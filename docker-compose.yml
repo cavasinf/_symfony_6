@@ -1,0 +1,69 @@
+version: '2'
+services:
+    apache:
+        image: allsoftware/symfony:5-php-8.2-v2
+        volumes:
+            - "./docker.php.settings.ini:/usr/local/etc/php/conf.d/docker.php.settings.ini"
+            - "./_docker-data-s3data:/var/www/html/var/s3data"
+            - "./:/var/www/html"
+            - "/var/www/html/var"
+        links:
+            - mysql:mysqlhost
+            - maildev:localsmtp
+        ports:
+            - "${userPrefixPort}80:80"
+        environment:
+            - xdebugRemoteMachine
+            - userPrefixPort
+        networks:
+            - proxitagnetwork
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        links:
+            - mysql:db
+        ports:
+            - "${userPrefixPort}81:80"
+        environment:
+            MYSQL_USERNAME: root
+            MYSQL_ROOT_PASSWORD: root
+        networks:
+            - proxitagnetwork
+
+    mysql:
+        image: mysql:8.0
+        volumes:
+            - "./_docker-data-mysql:/var/lib/mysql"
+        ports:
+            - "${userPrefixPort}336:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+        command:
+            mysqld --innodb-flush-method=littlesync --innodb-use-native-aio=OFF
+        networks:
+            - proxitagnetwork
+
+    caddy:
+        image: caddy:latest
+        restart: unless-stopped
+        links:
+            - apache
+        ports:
+            - "${userPrefixPort}443:443"
+            - "${userPrefixPort}443:443/udp"
+        volumes:
+            - "./Caddyfile:/etc/caddy/Caddyfile"
+        networks:
+            - proxitagnetwork
+
+    maildev:
+        image: maildev/maildev
+        ports:
+            - "${userPrefixPort}10:80"
+        networks:
+            - proxitagnetwork
+
+networks:
+    proxitagnetwork:
+        name: proxitagnetwork_${userPrefixPort}
+        driver: bridge

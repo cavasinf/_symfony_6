@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello HomeController!{% endblock %}
+
+{% block body %}
+    <ul>
+        <li><a href="{{ path('app_organisation_index') }}">Organisations</a></li>
+        <li><a href="{{ path('app_client_index') }}">Clients</a></li>
+    </ul>
+{% endblock %}
