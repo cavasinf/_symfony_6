@@ -17,26 +17,10 @@ class ClientController extends AbstractController
 {
     #[Route('/', name: 'app_client_index', methods: ['GET', 'POST'])]
     public function index(
-        Request $request,
         ClientRepository $clientRepository
     ): Response {
-        $formFilter = $this->createForm(ClientFilterType::class);
-        $formFilter->handleRequest($request);
-
-        dump($_POST);
-
-        if ($formFilter->isSubmitted() && $formFilter->isValid()) {
-            $clients = $clientRepository
-                ->filterQb($formFilter->getData())
-                ->getQuery()->getResult()
-            ;
-        } else {
-            $clients = $clientRepository->findAll();
-        }
-
         return $this->render('client/index.html.twig', [
-            'formFilter' => $formFilter->createView(),
-            'clients'    => $clients,
+            'clients'    => $clientRepository->findAll(),
         ]);
     }
 
