@@ -26,6 +26,7 @@ readonly class OrganisationListener
 
     public function preFlush(Organisation $organisation, PreFlushEventArgs $event): void
     {
+        dump($organisation); // <- should have $clients
         foreach ($organisation->getClients() as $client) {
             $client->setOrganisation($organisation);
         }
